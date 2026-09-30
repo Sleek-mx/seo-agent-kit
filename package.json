@@ -1,0 +1,14 @@
+{
+  "name": "posthog-analytics-kit",
+  "version": "1.0.0",
+  "description": "Daily PostHog visitor/funnel/traffic-source snapshots into Postgres, plus React dashboard cards",
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "snapshot": "node --env-file=.env scripts/posthog-snapshot.mjs",
+    "backfill": "node --env-file=.env scripts/posthog-snapshot.mjs --days 90"
+  },
+  "engines": { "node": ">=20" },
+  "dependencies": { "pg": "^8.13.0" },
+  "peerDependencies": { "react": ">=18", "recharts": ">=2" }
+}
