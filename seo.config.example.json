@@ -1,0 +1,58 @@
+{
+  "_note": "Copy to seo.config.json and fill in. Read by the seo-engine scripts (.claude/skills/seo-engine).",
+  "brand": "Your Product",
+  "site": "https://www.example.com",
+  "blog_path": "/blog",
+  "signup_path": "/sign-up",
+  "signup_event": "user_signed_up",
+  "docs_url": "https://www.example.com/docs",
+  "gsc_site": "https://www.example.com/",
+  "sitemaps": [
+    "https://www.example.com/sitemap.xml",
+    "https://www.example.com/blog/wp-sitemap.xml"
+  ],
+  "youtube_channel": "https://www.youtube.com/@YourChannel",
+  "youtube_videos": [],
+  "news_feeds": [
+    "https://hnrss.org/frontpage",
+    "https://openai.com/news/rss.xml"
+  ],
+  "daily_max": 10,
+  "spinoff_daily_max": 6,
+  "competitors": [
+    "Hootsuite",
+    "Buffer",
+    "Later",
+    "Sprout Social",
+    "Zapier",
+    "n8n"
+  ],
+  "niches": [
+    "agencies",
+    "coaches",
+    "gyms",
+    "real estate agents",
+    "restaurants",
+    "SaaS founders"
+  ],
+  "models": [
+    "Claude Opus 5.5",
+    "Claude Sonnet 5",
+    "Claude Code",
+    "ChatGPT",
+    "Cursor",
+    "Codex"
+  ],
+  "release_repos": [],
+  "npm_package": null,
+  "cli_name": null,
+  "external_allow": [
+    "github.com/",
+    "youtube.com/",
+    "youtu.be/",
+    "claude.ai",
+    "anthropic.com",
+    "modelcontextprotocol.io"
+  ],
+  "api_prefixes": []
+}

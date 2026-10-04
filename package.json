@@ -1,12 +1,15 @@
 {
   "name": "posthog-analytics-kit",
   "version": "1.0.0",
-  "description": "Daily PostHog visitor/funnel/traffic-source snapshots into Postgres, plus React dashboard cards",
+  "description": "PostHog visitor/funnel/traffic-source snapshots into Postgres, React dashboard cards, and a self-improving SEO blog engine for WordPress",
   "type": "module",
   "license": "MIT",
   "scripts": {
     "snapshot": "node --env-file=.env scripts/posthog-snapshot.mjs",
-    "backfill": "node --env-file=.env scripts/posthog-snapshot.mjs --days 90"
+    "backfill": "node --env-file=.env scripts/posthog-snapshot.mjs --days 90",
+    "seo:scout": "node --env-file=.env .claude/skills/seo-engine/scripts/scout.mjs",
+    "seo:publish": "node --env-file=.env .claude/skills/seo-engine/scripts/publish.mjs",
+    "seo:measure": "node --env-file=.env .claude/skills/seo-engine/scripts/measure.mjs"
   },
   "engines": { "node": ">=20" },
   "dependencies": { "pg": "^8.13.0" },
