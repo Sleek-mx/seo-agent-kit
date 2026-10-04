@@ -1,8 +1,26 @@
-# PostHog Analytics Kit + SEO Agent
+# SEO Agent Kit
 
-The PostHog web analytics setup from **Creator OS** (the marketing dashboard behind KevBuildsApps), pulled out so you can drop it into your own project.
+A self-improving SEO agent for Claude Code, from **Creator OS** (the marketing system behind KevBuildsApps).
+It writes blog posts that rank on Google and get cited by ChatGPT, Claude and Perplexity, reads PostHog
+to see which posts bring signups, and writes more like the winners. Fully open source.
 
-It gives you:
+## What you need
+
+Three connections:
+
+1. **Creator OS API connected to a WordPress site.** This is where the agent publishes. Sign up at
+   [creatoros.ca](https://www.creatoros.ca), connect WordPress (self-hosted or WordPress.com), copy the API key.
+2. **PostHog API.** A personal key (`phx_`) with Query: Read, and PostHog installed on your site.
+3. **Google Search Console API.** A service account added as an Owner of your property.
+
+Plus the basics any agent needs: a Postgres database (Supabase, Neon, Railway, local) and a model key
+(Claude, or any OpenAI-compatible API). Then follow [Setup](#setup) below.
+
+## What's inside
+
+- **The SEO agent** (`.claude/skills/seo-engine`, `wordpress-blog`, `ai-search-files`). See
+  [The SEO agent](#the-seo-agent-blog-engine) below.
+- **The PostHog analytics kit** the agent learns from:
 
 - **A twice-daily snapshot job** that pulls from PostHog (HogQL Query API) into Postgres:
   - visitors, pageviews and sessions per day

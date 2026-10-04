@@ -1,7 +1,7 @@
 {
-  "name": "posthog-analytics-kit",
+  "name": "seo-agent-kit",
   "version": "1.0.0",
-  "description": "PostHog visitor/funnel/traffic-source snapshots into Postgres, React dashboard cards, and a self-improving SEO blog engine for WordPress",
+  "description": "Self-improving SEO agent for Claude Code: writes, fact-checks and publishes WordPress posts via Creator OS, learns from PostHog signups and Google Search Console",
   "type": "module",
   "license": "MIT",
   "scripts": {
