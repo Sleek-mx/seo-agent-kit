@@ -5,7 +5,7 @@ description: Generate private Sleek Academia article drafts with local Ollama an
 
 # Sleek Academia SEO drafts
 
-Read `SETUP.md` in this kit before running. `seo:publish` is retained as a compatibility alias, but it only commits a Markdown draft under `drafts/` on the `content-drafts` branch. It never calls a publishing API or pushes.
+Read `SETUP.md` in this kit before running. `seo:publish` commits Markdown, standalone noindex Blog HTML, an archive card, and `NOTIFY_LATEST.json` on the `content-drafts` branch. It never calls a publishing API or pushes.
 
 Use `facts.json` as the sole source for product claims. Verify every generated claim against the live site before approving it. Human editorial review is mandatory. Maximum one local draft commit per Africa/Nairobi day.
 

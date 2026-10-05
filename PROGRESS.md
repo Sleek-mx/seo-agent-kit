@@ -1,21 +1,24 @@
-# PROGRESS — Sleek Academia drafts-only kit
+# PROGRESS — Sleek Academia local Blog drafts
 
-Goal: Adapt the fork into a local Ollama drafting tool that commits only to a safe non-main Sleek Academia worktree.
+Goal: Generate review-only Blog drafts with local Ollama and commit the Markdown, HTML, archive card, and notification to a separate `content-drafts` worktree.
 
 ## Done
-- [x] Confirmed kit fork, branch, GitHub identity, site main checkout, and public site facts.
-- [x] Identified and removed upstream live publishing and indexing paths.
-- [x] Replaced article path with local Ollama generation and a fail-closed git draft commit.
-- [x] Added verified facts, Nairobi timezone, local setup, and safety tests.
-- [x] Passed safety tests and direct local Ollama fail-closed check; pushed adaptation commit `aeaab71` to fork feature branch.
+
+- [x] Adapted the fork for Sleek Academia facts and local-only Ollama at `http://localhost:11434/v1`; no paid provider, WordPress publishing, or Namecheap deployment path.
+- [x] Added safe Markdown rendering, standalone noindex HTML, archive card update, and `NOTIFY_LATEST.json` in one local git commit.
+- [x] Kept `SEO_DAILY_MAX=1`, Africa/Nairobi day boundaries, an atomic git lock, exact `Sleek-mx` remotes, and branch checks. Dirty main checkout stays untouched.
+- [x] Added a cron recipe and Nairobi wrapper, both disabled by default.
+- [x] Installed free local `qwen2.5:3b`; a real Ollama dry run passed after stripping its duplicate body H1. The prose still needs human fact review.
+- [x] Passed kit tests (3/3). A clearly labeled local QA fixture went through `seo:publish` and committed four review files to `content-drafts` at `27aa223`; the draft branch now contains the latest Blog shell and passes 27 targeted SEO and analytics tests.
 
 ## Next
-- [ ] Finish the small Ollama model pull and run a real dry draft when bandwidth permits.
-- [ ] Resolve unrelated uncommitted changes in the site `main` checkout before running the draft command again.
 
-## Facts a fresh session needs
-- Kit: `/Volumes/Macsie_SSD/Github/Sleek Academia/seo-agent-kit`, branch `feat/sleek-academia-drafts`, origin `Sleek-mx/seo-agent-kit`.
-- Site: `/Volumes/Macsie_SSD/Github/Sleek Academia/sleekacademia`, branch `main`, origin `Sleek-mx/sleekacademia`.
-- No kit adaptation edits existed at start. No live site push, cron, paid API, or Cursor cloud agents.
-- Ollama installed with Homebrew. `qwen2.5:0.5b` pull was attempted but stopped after slow transfer; no model is installed yet.
-- A later final check found unrelated site `main` edits. The draft writer correctly fails closed on a dirty site checkout; do not reset or overwrite those edits.
+- [x] Record the site PR and final verification in `RESULT.md`; push the kit feature branch to `origin`.
+- [ ] Keep cron off until Mx reviews local draft quality and chooses to schedule it.
+
+## Facts for a fresh session
+
+- Kit: `/Volumes/Macsie_SSD/Github/Sleek Academia/seo-agent-kit`, branch `feat/sleek-academia-drafts`, origin `https://github.com/Sleek-mx/seo-agent-kit.git`.
+- Site feature: `/Volumes/Macsie_SSD/Github/Sleek Academia/sleekacademia-blog-seo-wire`, branch `feat/blog-seo-wire`, PR https://github.com/Sleek-mx/sleekacademia/pull/18.
+- Drafts: `/Volumes/Macsie_SSD/Github/Sleek Academia/sleekacademia-content-drafts`, local branch `content-drafts`; QA post is noindex and not pushed.
+- `npm run seo:publish` never pushes or deploys. The QA fixture uses the one-draft-per-Nairobi-day slot for 2026-10-05.

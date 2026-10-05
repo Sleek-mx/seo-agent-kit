@@ -1,28 +1,20 @@
-# Sleek Academia SEO draft kit — result
+# Sleek Academia Blog and SEO kit — result
 
-Fork: https://github.com/Sleek-mx/seo-agent-kit  
-Kit branch: `feat/sleek-academia-drafts` — pushed to the fork; initial adaptation commit `aeaab71`.
+## Delivered
 
-## Changed
-
-- Replaced Creator OS/WordPress publishing with local Ollama draft generation. `seo:publish` now commits a marked Markdown draft under `drafts/` on the site's separate `content-drafts` worktree. It never pushes or publishes live.
-- Added fail-closed checks for exact `Sleek-mx/sleekacademia` origin fetch and push URLs, clean site `main`, clean draft worktree, local-only model URL, and one draft per Africa/Nairobi day. The site checkout stays on `main`.
-- Set `SEO_PUBLISH_AS_DRAFT=1` and `SEO_DAILY_MAX=1`; changed all New York day buckets to Africa/Nairobi.
-- Filled `facts.json`, `seo.config.json`, and `seeds.json` from the public [home](https://sleekacademia.com/), [about](https://sleekacademia.com/about.html), [study plan](https://sleekacademia.com/study-plan.html), [AI guidance](https://sleekacademia.com/ai-in-school.html), and [pricing](https://sleekacademia.com/pricing.html) pages, plus social identifiers supplied by Mx. Unknowns are in `UNKNOWN.md`.
-- Removed `llms.txt`, AI-citation promise, IndexNow trigger, Creator OS integration, and the live-capable legacy SEO loop. `SETUP.md` explains the local workflow.
+- Site branch `feat/blog-seo-wire` pushed to `Sleek-mx/sleekacademia`; [PR #18](https://github.com/Sleek-mx/sleekacademia/pull/18) is open. It adds `/blog/`, a standalone `/blog/<slug>.html` template, Blog links in marketing navigation and footers, glass styling, a sitemap entry, and a redirect from retired Study Plan marketing URLs. The `/plan/` app route remains available.
+- Kit branch `feat/sleek-academia-drafts` pushed to `Sleek-mx/seo-agent-kit` with local Ollama wiring. `seo:publish` writes Markdown, noindex Blog HTML, an archive card, and `NOTIFY_LATEST.json` in one local commit to `content-drafts`. It allows one draft per Africa/Nairobi day and never pushes or deploys.
+- [SETUP.md](SETUP.md) documents the local Ollama setup, Mx notification hook, and an hourly cron example that is **off by default**. No paid model or Cursor cloud agent was used.
+- A clearly labeled QA preview was committed locally on `content-drafts` as `27aa223` and merged with the latest Blog shell. The article is `public/blog/2026-10-05-qa-preview-plan-an-online-class-around-work-shifts.html`; `NOTIFY_LATEST.json` marks it `review_ready_local` and `site_live: false`. The draft branch was **not pushed**.
 
 ## Verified
 
-- `npm test`: draft commit, branch isolation, remote rejection, dirty-checkout rejection, and Nairobi daily cap passed in temporary git fixtures.
-- `npm run seo:scout`: displayed the Sleek Academia seed topics.
-- Direct `seo:publish -- --dry-run` reached localhost Ollama and failed closed with HTTP 404 because no model is installed. It created a clean `content-drafts` worktree, with no draft file or site commit. No live site push or Namecheap deployment occurred.
-- Ollama installed through Homebrew. A free `qwen2.5:0.5b` pull was attempted, but slow transfer prevented completion. Real article quality and generation remain unverified.
-- At final check, the site `main` checkout had uncommitted changes from concurrent work. The draft script will refuse to run until that checkout is clean. Those site files were not changed or pushed by this adaptation.
+- Site and draft branch: 27 targeted SEO and analytics tests pass on each branch. Sitemap and analytics checks pass.
+- Kit: 3/3 tests pass. They cover the complete mocked publish path, safe remote and worktree checks, HTML escaping, and the Nairobi daily limit.
+- Real free local Ollama `qwen2.5:3b` dry run completed without writing a draft. Generated prose still needs human fact review; one run included an unsupported reminder claim. The kit rejects raw HTML and malformed Markdown, and the saved QA preview is a controlled fixture rather than model output.
+- BrowserSkill: checked Blog on desktop and mobile, opened its mobile menu, clicked Home → Blog, Blog → AI guide, Blog → onboarding, Blog → How It Works, and the QA archive card → standalone article. Local `/blog/` and `/plan/` returned HTTP 200; `/study-plan.html` returned HTTP 301 to `/blog/`.
+- Full site suite: 397 passed, 74 failed out of 471. Remaining failures include tests for retired public pages and older client flows. This branch does not claim a green full suite.
 
-## Mx later
+## Release state
 
-1. Finish `ollama pull qwen2.5:0.5b` and run a dry draft, then review every claim.
-2. Add the PostHog snippet and API key if analytics are wanted.
-3. Configure the Search Console service account if search metrics are wanted.
-4. Do not schedule the daily job yet.
-5. Resolve the site `main` checkout's uncommitted changes before running the draft command.
+No Namecheap or production deployment occurred. The public site has not been verified with these Blog changes. The QA article is private, noindex, and absent from the public sitemap; it requires editorial approval before any promotion. Main site checkout's unrelated dirty files were untouched. Cron remains disabled.

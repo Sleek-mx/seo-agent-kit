@@ -1,4 +1,4 @@
-// Drafts only. This command has no publishing API and never pushes a git branch.
+// Local draft publishing only. This command never pushes or deploys.
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -29,35 +29,42 @@ checkSite(siteRepo, worktree);
 ensureDraftWorktree(siteRepo, worktree);
 
 const allTopics = Object.values(seeds).flat().filter((s) => typeof s === 'string');
-const title = topicIndex >= 0 ? args[topicIndex + 1] : allTopics[0];
+const dayNumber = Math.floor(Date.parse(`${today}T00:00:00Z`) / 86_400_000);
+const title = topicIndex >= 0 ? args[topicIndex + 1] : allTopics[dayNumber % allTopics.length];
 if (!title) throw new Error('No seed topics configured; pass --topic');
 if (title.length > 160) throw new Error('Topic too long');
 
 const base = process.env.LLM_BASE_URL || 'http://localhost:11434/v1';
 if (base.replace(/\/$/, '') !== 'http://localhost:11434/v1') throw new Error('Only local Ollama at http://localhost:11434/v1 is allowed');
-const model = process.env.LLM_MODEL || 'qwen2.5:0.5b';
+const model = process.env.LLM_MODEL || 'qwen2.5:3b';
 const prompt = `Write a useful SEO article draft for working online college students. Topic: ${title}.
 Use ONLY these verified Sleek Academia facts: ${JSON.stringify(facts)}.
-Do not invent outcomes, turnaround times, guarantees, testimonials, academic rules, citations, or URLs. Students do their own coursework, submissions, and exams. Distinguish coaching from doing graded work. Use plain English, practical examples, and a short FAQ. Return one JSON object with keys title, excerpt, body. body must be Markdown without a top-level heading. Include relevant links only from facts.urls. This is a private human-review draft, never public content.`;
+Do not invent outcomes, turnaround times, guarantees, testimonials, academic rules, citations, prices, notifications, or URLs. Avoid any claim that experts handle student work. Students own their coursework, submissions, and exams. Show how coaching and AI can support learning. Use plain English, practical examples, and a short FAQ. Return one JSON object with keys title, excerpt, body. body must be plain Markdown with at least two separate ## section headings, including ## FAQ, without a top-level heading or any HTML tags. Use line breaks between sections and - for bullets. Include relevant links only from facts.urls. This is a private human-review draft, never public content.`;
 
 async function generate() {
   const response = await fetch(`${base}/chat/completions`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ model, response_format: { type: 'json_object' }, max_tokens: 3500, messages: [{ role: 'system', content: 'Return valid JSON only. Never invent product claims.' }, { role: 'user', content: prompt }] }),
+    body: JSON.stringify({ model, response_format: { type: 'json_object' }, max_tokens: 3500, temperature: 0.4, messages: [{ role: 'system', content: 'Return valid JSON only. Never invent product claims.' }, { role: 'user', content: prompt }] }),
     signal: AbortSignal.timeout(300_000),
   });
-  if (!response.ok) throw new Error(`Local Ollama returned HTTP ${response.status}`);
+  if (!response.ok) throw new Error(`Local Ollama returned HTTP ${response.status}: ${(await response.text()).slice(0, 300)}`);
   const data = await response.json();
   const raw = data.choices?.[0]?.message?.content?.trim();
   if (!raw) throw new Error('Local Ollama returned no draft');
   const draft = JSON.parse(raw.replace(/^```(?:json)?\s*/i, '').replace(/```$/, '').trim());
   if (![draft.title, draft.excerpt, draft.body].every((v) => typeof v === 'string' && v.trim())) throw new Error('Incomplete Ollama draft');
+  // The article shell already owns the sole H1; local models may repeat it.
+  draft.body = draft.body.trim().replace(/^#\s+[^\n]+\n+/, '');
+  if (/<\/?[a-z][^>]*>/i.test(draft.body)) throw new Error('Draft body contains HTML; expected Markdown');
+  if ((draft.body.match(/^##\s+\S/gm) || []).length < 2 || !/^##\s+FAQ\b/im.test(draft.body) || /^#\s+/m.test(draft.body)) {
+    throw new Error(`Draft body needs Markdown sections and FAQ; headings: ${JSON.stringify(draft.body.match(/^#{1,3}\s+[^\n]+/gm) || [])}; start: ${JSON.stringify(draft.body.slice(0, 160))}`);
+  }
   const text = `${draft.title}\n${draft.excerpt}\n${draft.body}`;
   if (text.length < 600 || draft.body.split(/\s+/).length < 150) throw new Error('Draft too short; nothing committed');
   for (const banned of facts.banned || []) if (text.toLowerCase().includes(banned.toLowerCase())) throw new Error(`Blocked claim: ${banned}`);
   for (const match of text.matchAll(/\$\s?\d+(?:\.\d{2})?/g)) {
-    if (!facts.allowed_prices.includes(match[0].replace(/\s/g, ''))) throw new Error(`Unverified price: ${match[0]}`);
+    throw new Error(`Price needs human review: ${match[0]}`);
   }
   for (const match of text.matchAll(/https?:\/\/[^\s)\]>"']+/g)) {
     if (!Object.values(facts.urls).includes(match[0].replace(/[.,]+$/, ''))) throw new Error(`Unverified URL: ${match[0]}`);
@@ -89,6 +96,6 @@ if (dry) {
   console.log(content);
   console.log('Dry run: no file or commit created.');
 } else {
-  const result = commitDraft(siteRepo, worktree, today, slug, content);
-  console.log(`Draft committed locally: ${result.file} (${result.commit}). No push performed.`);
+  const result = commitDraft(siteRepo, worktree, today, slug, draft, content);
+  console.log(`Draft and blog HTML committed locally: ${result.article} (${result.commit}). Notification: ${result.notify}. No push or deployment performed.`);
 }

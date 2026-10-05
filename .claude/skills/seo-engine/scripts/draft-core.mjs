@@ -1,6 +1,7 @@
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, readdirSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, readdirSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
+import { renderArticle, updateArchive } from './blog-render.mjs';
 
 const EXPECTED_REMOTE = 'https://github.com/Sleek-mx/sleekacademia.git';
 const BRANCH = 'content-drafts';
@@ -24,7 +25,8 @@ export function checkSite(siteRepo, worktree) {
   if (realpathSync(git(siteRepo, 'rev-parse', '--show-toplevel')) !== realpathSync(siteRepo)) throw new Error('SEO_SITE_REPO must be the checkout root');
   checkRemote(siteRepo);
   if (git(siteRepo, 'branch', '--show-current') !== 'main') throw new Error('Site checkout must remain on main');
-  if (git(siteRepo, 'status', '--porcelain')) throw new Error('Site checkout has uncommitted changes');
+  // Mx may have uncommitted work on main. This command writes only to the
+  // separate, clean content-drafts worktree.
 }
 
 export function ensureDraftWorktree(siteRepo, worktree) {
@@ -40,7 +42,7 @@ export function ensureDraftWorktree(siteRepo, worktree) {
   if (git(worktree, 'status', '--porcelain')) throw new Error('Draft worktree has uncommitted changes');
 }
 
-export function commitDraft(siteRepo, worktree, today, slug, content) {
+export function commitDraft(siteRepo, worktree, today, slug, draft, content) {
   checkSite(siteRepo, worktree);
   ensureDraftWorktree(siteRepo, worktree);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(today) || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) throw new Error('Invalid draft date or slug');
@@ -51,13 +53,49 @@ export function commitDraft(siteRepo, worktree, today, slug, content) {
     const dir = path.join(worktree, 'drafts');
     const existing = existsSync(dir) ? readdirSync(dir).filter((name) => name.startsWith(`${today}-`) && name.endsWith('.md')) : [];
     if (existing.length) throw new Error(`Nairobi daily maximum reached: ${existing[0]}`);
+    if (![draft.title, draft.excerpt, draft.body].every((value) => typeof value === 'string' && value.trim())) throw new Error('Incomplete blog draft');
+    const indexPath = path.join(worktree, 'public/blog/index.html');
+    const notifyPath = path.join(worktree, 'NOTIFY_LATEST.json');
+    const articleSlug = `${today}-${slug}`;
+    const articleRelative = `public/blog/${articleSlug}.html`;
+    const articlePath = path.join(worktree, articleRelative);
+    if (existsSync(articlePath)) throw new Error(`Blog slug already exists: ${slug}`);
+    const previousIndex = readFileSync(indexPath, 'utf8');
+    const previousNotify = existsSync(notifyPath) ? readFileSync(notifyPath, 'utf8') : null;
+    const article = renderArticle(worktree, articleSlug, today, draft);
+    const archive = updateArchive(previousIndex, articleSlug, today, draft);
+    const notify = JSON.stringify({
+      title: draft.title.trim(),
+      path: articleRelative,
+      review_url_path: `/blog/${articleSlug}.html`,
+      markdown_path: `drafts/${today}-${slug}.md`,
+      branch: BRANCH,
+      status: 'review_ready_local',
+      site_live: false,
+      timestamp: new Date().toISOString(),
+    }, null, 2) + '\n';
     mkdirSync(dir, { recursive: true });
     const relative = `drafts/${today}-${slug}.md`;
     const full = path.join(worktree, relative);
-    writeFileSync(full, content, { flag: 'wx' });
-    git(worktree, 'add', '--', relative);
-    execFileSync('git', ['-C', worktree, '-c', 'core.hooksPath=/dev/null', '-c', 'commit.gpgsign=false', 'commit', '--only', '-m', `Draft: ${slug} (${today} Nairobi)`, '--', relative], { stdio: ['ignore', 'pipe', 'pipe'] });
-    return { file: full, commit: git(worktree, 'rev-parse', '--short', 'HEAD') };
+    try {
+      writeFileSync(full, content, { flag: 'wx' });
+      writeFileSync(articlePath, article, { flag: 'wx' });
+      writeFileSync(indexPath, archive);
+      writeFileSync(notifyPath, notify);
+      const changed = [relative, articleRelative, 'public/blog/index.html', 'NOTIFY_LATEST.json'];
+      git(worktree, 'add', '--', ...changed);
+      git(worktree, 'diff', '--cached', '--check');
+      execFileSync('git', ['-C', worktree, '-c', 'core.hooksPath=/dev/null', '-c', 'commit.gpgsign=false', 'commit', '-m', `Draft blog: ${slug} (${today} Nairobi)`], { stdio: ['ignore', 'pipe', 'pipe'] });
+      return { file: full, article: articlePath, notify: notifyPath, commit: git(worktree, 'rev-parse', '--short', 'HEAD') };
+    } catch (error) {
+      git(worktree, 'reset', '-q', '--', relative, articleRelative, 'public/blog/index.html', 'NOTIFY_LATEST.json');
+      rmSync(full, { force: true });
+      rmSync(articlePath, { force: true });
+      writeFileSync(indexPath, previousIndex);
+      if (previousNotify === null) rmSync(notifyPath, { force: true });
+      else writeFileSync(notifyPath, previousNotify);
+      throw error;
+    }
   } finally {
     rmSync(lock, { recursive: true, force: true });
   }

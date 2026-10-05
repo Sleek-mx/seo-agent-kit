@@ -1,11 +1,43 @@
-# Drafts-only local setup
+# Sleek Academia local Blog draft setup
 
-1. From this kit checkout, run `cp .env.example .env`. The draft commands use Node built-ins, so no npm install is needed. Keep `SEO_PUBLISH_AS_DRAFT=1`, `SEO_DAILY_MAX=1`, and `LLM_BASE_URL=http://localhost:11434/v1`. No paid API key is used.
-2. Install Ollama if needed: `brew install ollama`. Start it with `ollama serve` in a terminal, then run `ollama pull qwen2.5:0.5b`. This small free model is for local drafts and may need substantial human editing. This does not install a cron job.
-3. Confirm the site checkout at `SEO_SITE_REPO` is clean, on `main`, and has exactly `https://github.com/Sleek-mx/sleekacademia.git` as both fetch and push URL for `origin`. The script creates a sibling `SEO_DRAFT_WORKTREE` on `content-drafts` if needed.
-4. Preview topics with `npm run seo:scout`. Generate without a commit with `npm run seo:publish -- --dry-run`. Create a local draft commit with `npm run seo:publish -- --topic "your specific topic"`.
-5. Review `drafts/YYYY-MM-DD-<slug>.md` in the draft worktree. Check every product statement, price, link, academic-integrity claim, and example against the live site. The file is marked `status: draft`, `human_review_required: true`, and `publication_approved: false`. No push or live publish occurs.
+The kit uses local Ollama only. A successful `npm run seo:publish` commits one Markdown draft, one `public/blog/<Nairobi-date>-<slug>.html` page, an archive card, and `NOTIFY_LATEST.json` to the separate `content-drafts` worktree. Draft HTML carries `noindex,nofollow`; no command here pushes a branch or deploys to Namecheap.
 
-Each Nairobi calendar day allows at most one file under `drafts/`. This applies even when `--topic` is supplied. A git lock prevents two simultaneous local runs from committing two drafts. Safety checks stop on wrong remote, dirty checkout, wrong branch, missing Ollama, or nonlocal model URL. If a generation fails, no draft is committed. A dry run may create the worktree but does not write a draft.
+## One-time setup
 
-`seo:publish` is a legacy command name only. Do not schedule it yet. This kit does not deploy to Namecheap.
+1. Keep the site checkout at `SEO_SITE_REPO` on `main` and the draft worktree at `SEO_DRAFT_WORKTREE` on `content-drafts`. Uncommitted work on site `main` is left untouched. The draft worktree must be clean, use the exact Sleek-mx origin, and contain `public/blog/index.html` plus `templates/blog-article.html` from the Blog site branch.
+2. Copy `.env.example` to `.env` in this kit. Leave `SEO_PUBLISH_AS_DRAFT=1`, `SEO_DAILY_MAX=1`, and `LLM_BASE_URL=http://localhost:11434/v1`. No paid key is needed. `.env` is ignored by git.
+3. Start Ollama locally and install a free model: `ollama serve` in one terminal, then `ollama pull qwen2.5:3b` in another. Check `ollama list`. The local model can produce weak or incorrect prose; edit every draft before promotion.
+4. Run `npm test`, `npm run seo:scout`, then `npm run seo:publish -- --dry-run`. When the output is acceptable, run `npm run seo:publish` or add `--topic "specific topic"`. Dry run never writes or commits.
+
+## Daily schedule example, disabled
+
+The macOS cron entry below invokes a wrapper hourly. The wrapper exits except at 09:00 **Africa/Nairobi**. This avoids Chicago daylight-saving shifts. Do not add the line until Mx wants unattended local drafting, Ollama is running, and the draft worktree is clean.
+
+```crontab
+0 * * * * /Volumes/Macsie_SSD/Github/Sleek\ Academia/seo-agent-kit/scripts/daily-nairobi.sh >> /tmp/sleek-academia-seo-daily.log 2>&1
+```
+
+The backslash escapes the space in `Sleek Academia`. Cron is **not installed by this kit**. The wrapper runs `/opt/homebrew/bin/node` unless `SEO_NODE_BIN` is set in cron. The one-draft-per-Nairobi-day lock still applies to manual and scheduled runs.
+
+## Grok Bot notification hook
+
+Grok Bot (Sleek Academia) can poll `/Volumes/Macsie_SSD/Github/Sleek Academia/sleekacademia-content-drafts/NOTIFY_LATEST.json`. When `timestamp` changes and `status` is `review_ready_local`, send Mx a chat ping with `title`, `path`, and branch `content-drafts`. Persist the last notified timestamp in bot state to prevent repeat pings. `site_live: false` means review-ready HTML exists locally; it does **not** mean sleekacademia.com serves it. The bot should verify the file exists before pinging.
+
+Example notification shape:
+
+```json
+{
+  "title": "How to plan a busy class week",
+  "path": "public/blog/2026-10-05-how-to-plan-a-busy-class-week.html",
+  "review_url_path": "/blog/2026-10-05-how-to-plan-a-busy-class-week.html",
+  "markdown_path": "drafts/2026-10-05-how-to-plan-a-busy-class-week.md",
+  "branch": "content-drafts",
+  "status": "review_ready_local",
+  "site_live": false,
+  "timestamp": "2026-10-05T06:00:00.000Z"
+}
+```
+
+## Review and promotion
+
+Read the Markdown and HTML, verify every claim against current public pages, and edit the draft. The HTML remains `noindex` while on `content-drafts`. After Mx approves a post, Mx can bring that post and its archive entry into a site release branch, change only the approved page to `index,follow`, rebuild the sitemap with `npm run build:sitemap`, and run site tests. Mx controls the separate Namecheap sync. This kit has no production credentials, webhook, `seo:promote` command, or automatic push.
