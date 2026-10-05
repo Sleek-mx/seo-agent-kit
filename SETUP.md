@@ -11,7 +11,7 @@ The kit uses local Ollama only. A successful `npm run seo:publish` commits one M
 
 ## Daily schedule (enabled on Mac Mini via launchd)
 
-Unattended drafting is enabled with LaunchAgent `com.sleekacademia.seo-daily` (hourly at `:00` Mac local time). `scripts/daily-nairobi.sh` still exits unless the hour is **09** in **Africa/Nairobi**, so Chicago DST does not shift the morning window. Requires Ollama (`brew services start ollama`) and a clean draft worktree. See [AUTOPILOT.md](AUTOPILOT.md) for pause/re-enable and the live promote path.
+Unattended drafting is enabled with LaunchAgent `com.sleekacademia.seo-daily` (runner `~/Automations/sleekacademia-seo/run-daily-nairobi.sh`) (hourly at `:00` Mac local time). `scripts/daily-nairobi.sh` still exits unless the hour is **09** in **Africa/Nairobi**, so Chicago DST does not shift the morning window. Requires Ollama (`brew services start ollama`) and a clean draft worktree. See [AUTOPILOT.md](AUTOPILOT.md) for pause/re-enable and the live promote path.
 
 Optional crontab equivalent (not used; `crontab` may hang without Full Disk Access):
 
