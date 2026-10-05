@@ -9,15 +9,17 @@ The kit uses local Ollama only. A successful `npm run seo:publish` commits one M
 3. Start Ollama locally and install a free model: `ollama serve` in one terminal, then `ollama pull qwen2.5:3b` in another. Check `ollama list`. The local model can produce weak or incorrect prose; edit every draft before promotion.
 4. Run `npm test`, `npm run seo:scout`, then `npm run seo:publish -- --dry-run`. When the output is acceptable, run `npm run seo:publish` or add `--topic "specific topic"`. Dry run never writes or commits.
 
-## Daily schedule example, disabled
+## Daily schedule (enabled on Mac Mini via launchd)
 
-The macOS cron entry below invokes a wrapper hourly. The wrapper exits except at 09:00 **Africa/Nairobi**. This avoids Chicago daylight-saving shifts. Do not add the line until Mx wants unattended local drafting, Ollama is running, and the draft worktree is clean.
+Unattended drafting is enabled with LaunchAgent `com.sleekacademia.seo-daily` (hourly at `:00` Mac local time). `scripts/daily-nairobi.sh` still exits unless the hour is **09** in **Africa/Nairobi**, so Chicago DST does not shift the morning window. Requires Ollama (`brew services start ollama`) and a clean draft worktree. See [AUTOPILOT.md](AUTOPILOT.md) for pause/re-enable and the live promote path.
+
+Optional crontab equivalent (not used; `crontab` may hang without Full Disk Access):
 
 ```crontab
 0 * * * * /Volumes/Macsie_SSD/Github/Sleek\ Academia/seo-agent-kit/scripts/daily-nairobi.sh >> /tmp/sleek-academia-seo-daily.log 2>&1
 ```
 
-The backslash escapes the space in `Sleek Academia`. Cron is **not installed by this kit**. The wrapper runs `/opt/homebrew/bin/node` unless `SEO_NODE_BIN` is set in cron. The one-draft-per-Nairobi-day lock still applies to manual and scheduled runs.
+The wrapper uses `/opt/homebrew/bin/node` unless `SEO_NODE_BIN` is set. The one-draft-per-Nairobi-day lock still applies to manual and scheduled runs.
 
 ## Grok Bot notification hook
 

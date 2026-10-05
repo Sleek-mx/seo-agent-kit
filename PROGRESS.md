@@ -14,7 +14,7 @@ Goal: Generate review-only Blog drafts with local Ollama and commit the Markdown
 ## Next
 
 - [x] Record the site PR and final verification in `RESULT.md`; push the kit feature branch to `origin`.
-- [ ] Keep cron off until Mx reviews local draft quality and chooses to schedule it.
+- [x] Enabled Mac Mini LaunchAgent `com.sleekacademia.seo-daily` (Nairobi 09:00 gate). Documented live gitsync + NOTIFY poll in AUTOPILOT.md. Cron unused (macOS crontab hung). Live auto-merge still gated on human approve + PR #18.
 
 ## Facts for a fresh session
 

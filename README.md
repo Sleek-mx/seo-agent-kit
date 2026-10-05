@@ -4,7 +4,7 @@ This fork generates review-ready article drafts for [sleekacademia.com](https://
 
 Read [SETUP.md](SETUP.md) for installation and local commands. [UNKNOWN.md](UNKNOWN.md) records missing business and analytics facts. [RESULT.md](RESULT.md) records this adaptation.
 
-`seo:publish` creates the local draft bundle and commit. `seo:scout` displays topic seeds. A disabled Nairobi-morning cron wrapper is provided; no cron or daily job is installed.
+`seo:publish` creates the local draft bundle and commit. `seo:scout` displays topic seeds. Nairobi-morning drafting is enabled on the Mac Mini via LaunchAgent `com.sleekacademia.seo-daily` (see AUTOPILOT.md). The wrapper still drafts locally only; live promote stays manual.
 
 Optional PostHog snapshot and dashboard components remain in `scripts/`, `lib/`, and `components/`. They are not part of the draft path and require Mx to configure PostHog and a database later. Their day buckets use Africa/Nairobi.
 
