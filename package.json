@@ -1,15 +1,15 @@
 {
   "name": "seo-agent-kit",
   "version": "1.0.0",
-  "description": "Self-improving SEO agent for Claude Code: writes, fact-checks and publishes WordPress posts via Creator OS, learns from PostHog signups and Google Search Console",
+  "description": "Local Ollama article drafting kit for Sleek Academia; commits private drafts to a non-main git worktree",
   "type": "module",
   "license": "MIT",
   "scripts": {
     "snapshot": "node --env-file=.env scripts/posthog-snapshot.mjs",
     "backfill": "node --env-file=.env scripts/posthog-snapshot.mjs --days 90",
-    "seo:scout": "node --env-file=.env .claude/skills/seo-engine/scripts/scout.mjs",
+    "seo:scout": "node .claude/skills/seo-engine/scripts/scout.mjs",
     "seo:publish": "node --env-file=.env .claude/skills/seo-engine/scripts/publish.mjs",
-    "seo:measure": "node --env-file=.env .claude/skills/seo-engine/scripts/measure.mjs"
+    "test": "node --test test/*.test.mjs"
   },
   "engines": { "node": ">=20" },
   "dependencies": { "pg": "^8.13.0" },

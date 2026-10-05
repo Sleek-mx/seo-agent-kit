@@ -123,7 +123,7 @@ export function WebTrafficChart({
   data: DailyCount[];
   subscribers?: DailyCount[];
   traffic?: DailyCount[];
-  /** Web only: PostHog user_signed_up per ET day. */
+  /** Web only: PostHog user_signed_up per Nairobi day. */
   signups?: DailyCount[];
   title?: string;
   /** web = visitors + web subs; ios = downloads + app-store subs. */

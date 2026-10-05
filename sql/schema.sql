@@ -1,7 +1,7 @@
 -- PostHog analytics kit: tables the snapshot script and dashboard libs use.
 -- (The snapshot script also creates these on first run.)
 create table if not exists web_analytics_snapshots (
-  snapshot_date date not null,           -- ET day
+  snapshot_date date not null,           -- Nairobi day
   channel_id text not null,              -- "default" in single-site mode
   project_id text not null,              -- PostHog project id
   visitors int not null default 0,       -- unique persons with a $pageview

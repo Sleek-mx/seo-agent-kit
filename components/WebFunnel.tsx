@@ -2,7 +2,7 @@ import { formatNumber } from "../lib/format";
 
 // Web-app funnel: PostHog
 // visitors -> user_signed_up -> onboarding_completed -> api_key_copied, then
-// paid subscribers (Stripe, RevenueCat, ...). Same 30 ET days as the Web chart. Bars scale to
+// paid subscribers (Stripe, RevenueCat, ...). Same 30 Nairobi days as the Web chart. Bars scale to
 // the widest step with a floor so small steps stay visible; the arrow between
 // rows is the step-to-step conversion.
 

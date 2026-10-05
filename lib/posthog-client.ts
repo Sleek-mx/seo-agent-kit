@@ -1,7 +1,7 @@
 import { dbConfigured, query } from "./db";
 
 export type DailyVisitors = {
-  date: string; // YYYY-MM-DD (ET)
+  date: string; // YYYY-MM-DD (Nairobi)
   visitors: number;
   pageviews: number;
   sessions: number;
@@ -14,10 +14,9 @@ export type DailyVisitors = {
 const liveCheckedAt = new Map<string, number>();
 const LIVE_COOLDOWN_MS = 90_000;
 
-/** Live top-up for today's row (the header must be current
- *  between the 9 AM / 9 PM ET cron sweeps). One HogQL query for today's ET pageviews /
- *  visitors / sessions, upserted into web_analytics_snapshots. Best-effort +
- *  time-boxed by the caller; falls back to the cron-fed rows. */
+/** Live top-up for today's row. One HogQL query for Nairobi pageviews,
+ *  visitors and sessions, upserted into web_analytics_snapshots. Best-effort +
+ *  time-boxed by the caller; falls back to stored snapshot rows. */
 async function liveTopUp(
   projectId: string,
   host: string,
@@ -29,10 +28,9 @@ async function liveTopUp(
   const last = liveCheckedAt.get(projectId) ?? 0;
   if (Date.now() - last < LIVE_COOLDOWN_MS) return;
 
-  // "Today" must be the ET day — both sides of the comparison in ET.
-  // today() evaluates in UTC, so after ~8pm ET (past midnight UTC) it rolls
-  // to tomorrow while visits are still bucketed under the ET date → the query
-  // returned 0 every evening.
+  // "Today" must be the Nairobi day — both sides of the comparison in Nairobi.
+  // today() can use a different server timezone. Compare both sides in
+  // Africa/Nairobi to avoid a date-boundary mismatch.
   const hogql = `
     SELECT
       countIf(event = '$pageview') AS pageviews,
@@ -43,7 +41,7 @@ async function liveTopUp(
       countIf(event = 'api_key_copied') AS api_keys
     FROM events
     WHERE event IN ('$pageview', 'user_signed_up', 'onboarding_completed', 'api_key_copied')
-      AND toDate(toTimeZone(timestamp, 'America/New_York')) = toDate(toTimeZone(now(), 'America/New_York'))`;
+      AND toDate(toTimeZone(timestamp, 'Africa/Nairobi')) = toDate(toTimeZone(now(), 'Africa/Nairobi'))`;
   const res = await fetch(`${host}/api/projects/${projectId}/query/`, {
     method: "POST",
     headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
@@ -54,7 +52,7 @@ async function liveTopUp(
   const json = (await res.json()) as { results?: number[][] };
   const row = json.results?.[0] ?? [0, 0, 0, 0, 0, 0];
   const [pageviews, visitors, sessions, signups, onboarded, apiKeys] = row.map((n) => Number(n) || 0);
-  const todayEt = new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date());
+  const todayEt = new Intl.DateTimeFormat("en-CA", { timeZone: "Africa/Nairobi" }).format(new Date());
   await query(
     `insert into web_analytics_snapshots
        (snapshot_date, channel_id, project_id, visitors, pageviews, sessions, signups, onboarded, api_keys, captured_at)
@@ -79,7 +77,7 @@ async function liveTopUp(
         countIf(event = 'user_signed_up') AS signups
       FROM events
       WHERE event IN ('$pageview', 'user_signed_up')
-        AND toDate(toTimeZone(timestamp, 'America/New_York')) = toDate(toTimeZone(now(), 'America/New_York'))
+        AND toDate(toTimeZone(timestamp, 'Africa/Nairobi')) = toDate(toTimeZone(now(), 'Africa/Nairobi'))
       GROUP BY src
       LIMIT 500`;
     const r2 = await fetch(`${host}/api/projects/${projectId}/query/`, {
@@ -106,8 +104,8 @@ async function liveTopUp(
   liveCheckedAt.set(projectId, Date.now());
 }
 
-/** Daily website-visitor series for the last `days` ET days, read from the
- *  cron-fed `web_analytics_snapshots` table plus a live top-up for today.
+/** Daily website-visitor series for the last `days` Nairobi days, read from the
+ *  `web_analytics_snapshots` table plus a live top-up for today.
  *  Empty until the PostHog snippet is live and traffic arrives. */
 export async function getWebVisitorsDaily(
   channelId: string,

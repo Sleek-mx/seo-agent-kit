@@ -1,6 +1,0 @@
-{
-  "_note": "Optional. Copy to cli.json (and set cli_name in seo.config.json) if your product has a CLI. Every command and flag in a code sample is checked against this list: invented flags are removed, unknown commands rejected.",
-  "cli": {
-    "posts:create": { "usage": "posts:create --text <text> --platforms <list> [--schedule <iso>]", "flags": ["--text", "--platforms", "--schedule"] }
-  }
-}

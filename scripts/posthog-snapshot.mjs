@@ -3,7 +3,7 @@
  * posthog-snapshot — daily website-visitor capture from PostHog into Postgres.
  *
  * For every channel with a posthog_project_id, runs one HogQL query over the
- * PostHog Query API for a per-ET-day series of unique visitors, pageviews, and
+ * PostHog Query API for a per-Nairobi-day series of unique visitors, pageviews, and
  * sessions (last ~35 days; `--days N` to backfill), plus the web-app funnel
  * events (user_signed_up / onboarding_completed / api_key_copied), and upserts one row per (day, channel) into
  * `web_analytics_snapshots`. The Overview header reads THIS table for the
@@ -13,7 +13,7 @@
  * Read. Host + project id come from the channel row (posthog_host defaults to
  * US cloud). Region-agnostic — set posthog_host to eu.posthog.com for EU.
  *
- * Run it twice a day (9 AM + 9 PM ET) from any cron. Safe to re-run any time;
+ * Run manually until scheduling is authorized. Safe to re-run any time;
  * upserts by (day, channel).
  *
  * Env: DATABASE_URL, POSTHOG_API_KEY, and POSTHOG_PROJECT_ID (single site) or a
@@ -57,12 +57,12 @@ const DAYS = (() => {
   return Number.isFinite(n) && n > 0 ? Math.min(400, Math.floor(n)) : 35;
 })();
 
-// Per-ET-day pageviews, unique visitors, unique sessions + funnel events over
-// the window. toTimeZone keeps the day buckets aligned to ET (matches the rest
+// Per-Nairobi-day pageviews, unique visitors, unique sessions + funnel events over
+// the window. toTimeZone keeps the day buckets aligned to Nairobi (matches the rest
 // of the dashboard); $session_id groups pageviews into sessions.
 const HOGQL = `
   SELECT
-    toDate(toTimeZone(timestamp, 'America/New_York')) AS day,
+    toDate(toTimeZone(timestamp, 'Africa/Nairobi')) AS day,
     countIf(event = '$pageview') AS pageviews,
     count(DISTINCT if(event = '$pageview', person_id, NULL)) AS visitors,
     count(DISTINCT if(event = '$pageview', properties.$session_id, NULL)) AS sessions,
@@ -82,7 +82,7 @@ const HOGQL = `
 // with no referrer). Raw sources are stored; the dashboard groups families.
 const SOURCES_HOGQL = `
   SELECT
-    toDate(toTimeZone(timestamp, 'America/New_York')) AS day,
+    toDate(toTimeZone(timestamp, 'Africa/Nairobi')) AS day,
     if(notEmpty(coalesce(session.$entry_utm_source, '')), concat('utm:', session.$entry_utm_source),
        coalesce(session.$entry_referring_domain, '$direct')) AS src,
     count(DISTINCT if(event = '$pageview', person_id, NULL)) AS visitors,
@@ -178,10 +178,10 @@ async function main() {
     } catch (e) {
       console.warn(`  ! sources: ${e.message}`);
     }
-    // Always heartbeat TODAY's row (ET) even at zero traffic — gives the
+    // Always heartbeat TODAY's row (Nairobi) even at zero traffic — gives the
     // watchdog a captured_at to verify and the header a "today" number
     // instead of a stale last-nonzero day.
-    const todayEt = new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date());
+    const todayEt = new Intl.DateTimeFormat("en-CA", { timeZone: "Africa/Nairobi" }).format(new Date());
     const has = rows.some((r) => String(r[0]).slice(0, 10) === todayEt);
     if (!has) {
       await pool.query(

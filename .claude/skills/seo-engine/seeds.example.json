@@ -1,6 +1,0 @@
-{
-  "_note": "Copy to seeds.json. Evergreen backlog: { cluster: [titles] }. Scout adds up to 8 a day so the queue never runs dry. One distinct search intent per title.",
-  "comparison": ["Your Product vs Competitor A for small teams", "Competitor B alternative with an API"],
-  "how-to": ["How to schedule a month of posts in one sitting", "How to connect Claude to your social accounts"],
-  "niche": ["Social media automation for gyms", "AI posting workflow for real estate agents"]
-}

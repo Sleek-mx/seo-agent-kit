@@ -1,0 +1,25 @@
+{
+  "product": "Sleek Academia provides coaching, study systems, and class help for working online college students in the US and UK.",
+  "urls": {
+    "home": "https://sleekacademia.com",
+    "about": "https://sleekacademia.com/about.html",
+    "study_plan": "https://sleekacademia.com/study-plan.html",
+    "ai_guidance": "https://sleekacademia.com/ai-in-school.html",
+    "pricing": "https://sleekacademia.com/pricing.html",
+    "free_class_audit": "https://sleekacademia.com/free-class-audit.html"
+  },
+  "audience": ["Working online college students in the US and UK"],
+  "offer": ["Coaching", "Study systems", "Class planning", "Concept explanations", "Feedback", "Deadline tracking", "Free Class Audit"],
+  "subjects": ["Nursing", "IT", "Accounting", "mathematics", "sciences", "programming"],
+  "pricing": [
+    "Alpha: $25 per month; $50 for a full 8-week class",
+    "Beta: $100 per month; $200 for a full 8-week class",
+    "Romeo: $300 per month; $600 for a full 8-week class"
+  ],
+  "allowed_prices": ["$25", "$50", "$100", "$200", "$300", "$600"],
+  "study_plan": "Students add a class name, school, and syllabus to make a week-by-week schedule. The free plan holds one class.",
+  "ai_guidance": "Use AI to clarify, plan, practice, and check understanding. Students draft from their own notes and readings.",
+  "limits": ["Students remain responsible for their own coursework, submissions, and exams.", "Sleek Academia does not do graded work for students."],
+  "social_same_as": ["Instagram @sleek_academia", "TikTok @sleek_e_learn", "LinkedIn in/sir-maxwell-763b9818b", "YouTube UCID9SDULAMHqyKjB65Bo01A"],
+  "banned": ["guaranteed grade", "guaranteed admission", "we submit your", "we take your exam", "we write your assignment"]
+}

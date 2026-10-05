@@ -4,7 +4,7 @@ import { dbConfigured, query } from "./db";
 const SITE = (process.env.SITE_DOMAIN || "example.com").toLowerCase();
 
 // Where web-app visitors come from. The posthog-snapshot job
-// stores RAW session entry sources per ET day (referring domain, or `utm:<src>`
+// stores RAW session entry sources per Nairobi day (referring domain, or `utm:<src>`
 // when a UTM source is present) in web_referrer_snapshots; this groups them
 // into families for the Overview "Traffic sources" card.
 
@@ -55,14 +55,14 @@ export function sourceFamily(raw: string): Omit<SourceFamily, "visitors" | "sign
   return { key: `d:${dom}`, label: dom, platform: null, domain: dom.includes(".") ? dom : null };
 }
 
-/** Sources for the last `days` ET days, grouped into families, visitors desc. */
+/** Sources for the last `days` Nairobi days, grouped into families, visitors desc. */
 export async function getWebSources(channelId: string, days = 30): Promise<SourceFamily[]> {
   if (!dbConfigured) return [];
   const rows = await query<{ source: string; visitors: number; signups: number }>(
     `select source, sum(visitors)::int as visitors, sum(signups)::int as signups
        from web_referrer_snapshots
       where channel_id = $1
-        and snapshot_date >= ((now() at time zone 'America/New_York')::date - ($2::int - 1))
+        and snapshot_date >= ((now() at time zone 'Africa/Nairobi')::date - ($2::int - 1))
       group by source`,
     [channelId, days],
   ).catch(() => []);
@@ -82,7 +82,7 @@ export type SourcePeriodKey = "today" | "yesterday" | "7d" | "30d";
 export type SourcePeriod = { key: SourcePeriodKey; label: string; sources: SourceFamily[] };
 
 /** The card's period tabs: Today / Yesterday / 7 days / 30
- *  days, all grouped from one read of the last 30 ET days so tabs switch
+ *  days, all grouped from one read of the last 30 Nairobi days so tabs switch
  *  client-side without refetching. */
 export async function getWebSourcePeriods(channelId: string): Promise<SourcePeriod[]> {
   if (!dbConfigured) return [];
@@ -90,10 +90,10 @@ export async function getWebSourcePeriods(channelId: string): Promise<SourcePeri
     `select snapshot_date::text as d, source, visitors, signups
        from web_referrer_snapshots
       where channel_id = $1
-        and snapshot_date >= ((now() at time zone 'America/New_York')::date - 29)`,
+        and snapshot_date >= ((now() at time zone 'Africa/Nairobi')::date - 29)`,
     [channelId],
   ).catch(() => []);
-  const todayEt = new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date());
+  const todayEt = new Intl.DateTimeFormat("en-CA", { timeZone: "Africa/Nairobi" }).format(new Date());
   const age = (d: string) =>
     Math.round((Date.parse(`${todayEt}T12:00:00Z`) - Date.parse(`${d.slice(0, 10)}T12:00:00Z`)) / 86_400_000);
   const group = (keep: (a: number) => boolean): SourceFamily[] => {
