@@ -1,7 +1,7 @@
 # Sleek Academia SEO draft kit — result
 
 Fork: https://github.com/Sleek-mx/seo-agent-kit  
-Kit branch: `feat/sleek-academia-drafts`
+Kit branch: `feat/sleek-academia-drafts` — pushed to the fork; initial adaptation commit `aeaab71`.
 
 ## Changed
 
@@ -17,6 +17,7 @@ Kit branch: `feat/sleek-academia-drafts`
 - `npm run seo:scout`: displayed the Sleek Academia seed topics.
 - Direct `seo:publish -- --dry-run` reached localhost Ollama and failed closed with HTTP 404 because no model is installed. It created a clean `content-drafts` worktree, with no draft file or site commit. No live site push or Namecheap deployment occurred.
 - Ollama installed through Homebrew. A free `qwen2.5:0.5b` pull was attempted, but slow transfer prevented completion. Real article quality and generation remain unverified.
+- At final check, the site `main` checkout had uncommitted changes from concurrent work. The draft script will refuse to run until that checkout is clean. Those site files were not changed or pushed by this adaptation.
 
 ## Mx later
 
@@ -24,3 +25,4 @@ Kit branch: `feat/sleek-academia-drafts`
 2. Add the PostHog snippet and API key if analytics are wanted.
 3. Configure the Search Console service account if search metrics are wanted.
 4. Do not schedule the daily job yet.
+5. Resolve the site `main` checkout's uncommitted changes before running the draft command.
